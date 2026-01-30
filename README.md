@@ -45,5 +45,5 @@ Las modificaciones para evaluar diferentes años y el ajuste al escenario de Col
 ## Licencia
 
 Este proyecto está bajo la licencia MIT, 
-mira la [LICENCIA](licencia.md) 
+mira la [LICENCIA](LICENSE.md) 
 para obtener más detalles.
