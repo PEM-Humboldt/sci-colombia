@@ -45,5 +45,5 @@ Las modificaciones para evaluar diferentes años y el ajuste al escenario de Col
 ## Licencia
 
 Este proyecto está bajo la licencia MIT, 
-mira la [LICENCIA](LICENSE.md) 
+mira la [LICENCIA](https://github.com/PEM-Humboldt/sci-colombia/blob/main/LICENSE) 
 para obtener más detalles.
