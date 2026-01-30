@@ -39,7 +39,7 @@ print('Promedio SCI 20'+maxYear.getInfo()+':', promedio);
 ```
 
 ## Autores(as) y contacto
-Esta metodología fue diseñada por el equipo de Andrew Hansen y puede consultarse en el enlace: [Hansen et al. (2019)] https://www.nature.com/articles/s41597-019-0214-3#Tab2
+Esta metodología fue diseñada por el equipo de Andrew Hansen y puede consultarse en el enlace: [Hansen et al. (2019)](https://www.nature.com/articles/s41597-019-0214-3#Tab2)
 Las modificaciones para evaluar diferentes años y el ajuste al escenario de Colombia fue por parte de Luis Hernando Romero Jiménez (lromero@humboldt.org.co)
 
 ## Licencia
