@@ -36,6 +36,7 @@ Map.addLayer(image6, {},'Bosques Etter');
 // con el año de intervención, la densidad y altura del dosel. El tiempo de 
 // intervención cambia según el año de estudio (2017 a 2024), y a partir de este 
 // se definen períodos de los últimos 5 años, entre 6 a 17 años y más de 17 años.
+// Recuerde que no es posible calcular el índice para años anteriores a 2017
 
 // Se define el año de trabajo colocando los dos últimos digitos. 
 
@@ -93,9 +94,34 @@ print(sciFinalnew);
 
 Map.addLayer(sciFinalnew, {min:0, max: 18}, 'SCI_20'+maxYear.getInfo());
 
+// Este resultado corresponde al índice SCI para el área de estudio, que puede 
+// descargarse de dos maneras diferentes: 
+// Opción 1: Descarga en almacenamiento de Drive 
+
+Export.image.toDrive({
+  image: sciFinalnew.clip(aoi), 
+  description: 'SCI_Colombia_'+maxYear.getInfo()+'_retrospectivo',
+  folder: 'GEE_Humboldt',
+  region: aoi, 
+  scale:30, 
+  maxPixels:1e13,
+  crs: 'EPSG:3116'});
+
+// Opción 2: Descarga en los Assets de Google Earth Engine 
+
+// Export.image.toAsset({
+//   image: sciFinalnew.clip(aoi),
+//   description: 'SCI_Colombia_'+maxYear.getInfo()+'_retrospectivo',
+//   crs: 'EPSG:3116',
+//   region: aoi,
+//   scale: 30,
+//   maxPixels: 1e13,
+// });
+
 // Paso extra
 // Es posible aplicar una nueva máscara para centrarse en áreas específicas, como
-// por ejemplo la capa de Bosque no Bosque de IDEAM
+// por ejemplo la capa de Bosque no Bosque de IDEAM. Esta capa también se encuentra
+// disponible para los años entre 2017 y 2024
 
 var bnb = ee.String('projects/ee-lromero/assets/BQNBQ_20'+maxYear.getInfo());
 var bnb = ee.Image(bnb);
@@ -114,24 +140,5 @@ var promedio = sci_bnb.reduceRegion({
 
 print('Promedio SCI 20'+maxYear.getInfo()+':', promedio);
 
-// Exportar la capa a Google Drive para otros usos
-
-Export.image.toDrive({
-  image: sci_bnb.clip(aoi), 
-  description: 'SCI_Colombia_BNB_20'+maxYear.getInfo()+'_retrospectivo',
-  folder: 'GEE_Humboldt',
-  region: aoi, 
-  scale:30, 
-  maxPixels:1e13,
-  crs: 'EPSG:3116'});
-
-// O Guardarla en los Asset de Google Earth Engine 
-
-// Export.image.toAsset({
-//   image: sciFinalnew,
-//   description: 'SCI_Colombia_2023',
-//   crs: 'EPSG:3116',
-//   region: aoi,
-//     scale: 30,
-//   maxPixels: 1e13,
-// });
+// Si desea descargar esta nueva información, puede utilizar cualquiera
+// de las dos opciones de descarga presentadas anteriormente.
