@@ -1,1 +1,144 @@
+// Cálculo de Forest Structural Condition Index (SCI)
 
+// Carga de shapefile de Colombia o área de interés
+var aoi = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017")
+              .filter(ee.Filter.eq('country_na', 'Colombia'));
+
+// Carga de insumos principales:
+// image= Última versión disponible del Global Forest Change
+// image2, image4= Capas de densidad de dosel que cubren la totalidad de Colombia
+// image3= Capa global de altura de dosel
+// image5= Capa de altura de dosel ajustada para Colombia
+// image6= Capa de bosques potenciales de Andrés Etter
+
+var image = ee.Image("UMD/hansen/global_forest_change_2024_v1_12").clip(aoi);
+var image2 = ee.Image('users/andrewjhansen31/treeCover_SA');
+var image4 = ee.Image('users/andrewjhansen31/20N_080W_treecover2010_v3');
+var merged_img = ee.ImageCollection([image2, image4]).mosaic().clip(aoi);
+var image3 = ee.Image('users/andrewjhansen31/treeheight_SA').clip(aoi);
+var image5 = ee.Image('projects/ee-lromero/assets/Tree_height_2019').clip(aoi);
+var image6 = ee.Image('projects/ee-lromero/assets/Bosques_etter');
+
+var lossYear = image.select(['lossyear']).unmask().clip(aoi);
+var forest = merged_img.select(['b1'],['treecover']);
+var height2 = image3.select(['b1'],['height']);
+var height = image5.select(['b1'],['height']);
+
+// Visualización de las capas base
+
+Map.addLayer(forest, {min:0, max:100}, 'Forest');
+Map.addLayer(height, {min:0, max:20}, 'Forest Height');
+Map.addLayer(height2, {min:0, max:30}, 'Forest Height Fagua');
+Map.addLayer(lossYear, {min:0, max:24}, 'Forest LossYear');
+Map.addLayer(image6, {},'Bosques Etter');
+
+// Este índice se basa en agrupar la estructura de dosel en categorías de acuerdo
+// con el año de intervención, la densidad y altura del dosel. El tiempo de 
+// intervención cambia según el año de estudio (2017 a 2024), y a partir de este 
+// se definen períodos de los últimos 5 años, entre 6 a 17 años y más de 17 años.
+// Recuerde que no es posible calcular el índice para años anteriores a 2017
+
+// Se define el año de trabajo colocando los dos últimos digitos. 
+
+var maxYear = ee.Number(24);
+
+// Aquí se visualizan los años que se usarán para construir las categorías
+
+print(maxYear);
+print(maxYear.add(-4));
+print(maxYear.add(-5));
+print(maxYear.add(-16));
+
+// Tomando 2024 como año de estudio, los valores anteriores indican que la categoría 
+// de intervención reciente (y que automáticamente tendrían un valor de SCI = 1), 
+// serán los píxeles de bosque con año de intervención entre 2020 y 2024. La segunda
+// categoría de intervención sería entre 2008 y 2019, y en la tercera estarán los 
+// píxeles con año de intervención antes del 2008. Si se cambia de año de estudio,
+// los límites van a cambiar.
+
+// Ahora, junto con la densidad de dosel y la altura de dosel se construyen las 
+// categorías del SCI que irán desde 1 (Bosques bajos, abiertos y recientemente
+// intervenidos) hasta 18 (Bosques altos, densos y poco intervenidos)
+
+var sciImage1 = lossYear.lte(maxYear).and(lossYear.gte(maxYear.add(-4))).or(forest.lt(25)).or(height.lte(5));
+var sciImage2 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(5)).and(height.lte(15)).and(forest.gte(25)).and(forest.lte(75)).multiply(2);
+var sciImage3 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(5)).and(height.lte(15)).and(forest.gt(75)).and(forest.lte(95)).multiply(3);
+var sciImage4 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(5)).and(height.lte(15)).and(forest.gt(95)).multiply(4);
+var sciImage5 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(15)).and(height.lte(20)).and(forest.gte(25)).and(forest.lte(75)).multiply(5);
+var sciImage6 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(15)).and(height.lte(20)).and(forest.gt(75) ).and(forest.lte(95)).multiply(6);
+var sciImage7 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(15)).and(height.lte(20)).and(forest.gt(95)).multiply(7);
+var sciImage8 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(20)).and(forest.gte(25)).and(forest.lte(75)).multiply(8);
+var sciImage9 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(20)).and(forest.gt(75)).and(forest.lte(95)).multiply(9);
+var sciImage10 = lossYear.gte(maxYear.add(-16)).and(lossYear.lte(maxYear.add(-5))).and(height.gt(20)).and(forest.gt(95)).multiply(10);
+var sciImage16 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(20)).and(forest.gte(25)).and(forest.lte(75).multiply(16));
+var sciImage17 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(20)).and(forest.gte(75)).and(forest.lte(95)).multiply(17);
+var sciImage18 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(20)).and(forest.gt(95)).multiply(18);
+var sciImage102 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(5)).and(height.lte(15)).and(forest.gte(25)).and(forest.lte(75)).multiply(10);
+var sciImage11 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(5)).and(height.lte(15)).and(forest.gt(75)).and(forest.lte(95)).multiply(11);
+var sciImage12 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(5)).and(height.lte(15)).and(forest.gt(95)).multiply(12);
+var sciImage13 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(15)).and(height.lte(20)).and(forest.gte(25)).and(forest.lte(75)).multiply(13);
+var sciImage14 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(15)).and(height.lte(20)).and(forest.gt(75)).and(forest.lte(95)).multiply(14);
+var sciImage15 = lossYear.lt(maxYear.add(-16)).or(lossYear.gt(maxYear)).and(height.gt(15)).and(height.lte(20)).and(forest.gt(95)).multiply(15);
+
+var sci1to4 = sciImage1.add(sciImage2).add(sciImage3).add(sciImage4);
+var sci5to9 = sciImage5.add(sciImage6).add(sciImage7).add(sciImage8).add(sciImage9);
+var sci10to14 = sciImage10.add(sciImage11).add(sciImage12).add(sciImage13).add(sciImage14);
+var sci15to18 = sciImage15.add(sciImage16).add(sciImage17).add(sciImage18);
+
+// Aquí se construye la capa final y se aplica la máscara de bosques potenciales
+// para excluir las áreas de no bosque
+
+var sciFinalnew = sci1to4.add(sci5to9).add(sci10to14).add(sci15to18).add(sciImage102).updateMask(image6).rename('SCInew');
+
+print(sciFinalnew);
+
+Map.addLayer(sciFinalnew, {min:0, max: 18}, 'SCI_20'+maxYear.getInfo());
+
+// Este resultado corresponde al índice SCI para el área de estudio, que puede 
+// descargarse de dos maneras diferentes: 
+// Opción 1: Descarga en almacenamiento de Drive 
+
+Export.image.toDrive({
+  image: sciFinalnew.clip(aoi), 
+  description: 'SCI_Colombia_'+maxYear.getInfo()+'_retrospectivo',
+  folder: 'GEE_Humboldt',
+  region: aoi, 
+  scale:30, 
+  maxPixels:1e13,
+  crs: 'EPSG:3116'});
+
+// Opción 2: Descarga en los Assets de Google Earth Engine 
+
+// Export.image.toAsset({
+//   image: sciFinalnew.clip(aoi),
+//   description: 'SCI_Colombia_'+maxYear.getInfo()+'_retrospectivo',
+//   crs: 'EPSG:3116',
+//   region: aoi,
+//   scale: 30,
+//   maxPixels: 1e13,
+// });
+
+// Paso extra
+// Es posible aplicar una nueva máscara para centrarse en áreas específicas, como
+// por ejemplo la capa de Bosque no Bosque de IDEAM. Esta capa también se encuentra
+// disponible para los años entre 2017 y 2024
+
+var bnb = ee.String('projects/ee-lromero/assets/BQNBQ_20'+maxYear.getInfo());
+var bnb = ee.Image(bnb);
+var sci_bnb = sciFinalnew.updateMask(bnb.eq(1));
+
+Map.addLayer(sci_bnb, {min:0, max: 18}, 'SCI_BNB_20'+maxYear.getInfo());
+
+// A manera de indicador, es posible sacar el promedio del área evaluada
+
+var promedio = sci_bnb.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: aoi,   
+  scale: 30,                     
+  maxPixels: 1e13                
+});
+
+print('Promedio SCI 20'+maxYear.getInfo()+':', promedio);
+
+// Si desea descargar esta nueva información, puede utilizar cualquiera
+// de las dos opciones de descarga presentadas anteriormente.
