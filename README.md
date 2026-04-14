@@ -18,7 +18,7 @@ var image6 = ee.Image('projects/ee-lromero/assets/Bosques_etter');
 ```
 
 ## Cómo ejecutar
-Primero se define el año de trabajo definiendo en una variable los dos últimos dígitos. En el momento en que se publica esta rutina, el set de datos más actualizado es del año 2024, y en caso de que se requiera un año previo, se recomienda que se defina como mínimo el año 2017. Con los años antes de 2017 el script no funcionará por la manera en como están definidas las categorías. En el script se usó como ejemplo el año 2024
+Primero se define el año de trabajo definiendo en una variable los dos últimos dígitos. En el momento en que se publica esta rutina, el set de datos más actualizado es del año 2024, y en caso de que se requiera un año previo, se recomienda que se defina como mínimo el año 2017. Con los años antes de 2017 el script no funcionará por la manera en como están definidas las categorías (** detallar). En el script se usó como ejemplo el año 2024
 
 ```
 var maxYear = ee.Number(24);
