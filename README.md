@@ -1,7 +1,7 @@
 # sci-colombia
 Este indicador mide la estructura de los bosques midiendo 3 variables principales: densidad de dosel, altura de dosel y 
 tiempo de intervención, generando una categoría que varía entre 1 (Bosques bajos, abiertos y recientemente disturbados) y
-18 (Bosques altos, densos y poco disturbados). (**Describe brevemente como es la integración, se suman , ponderan ??, es decir guia rapida para entnder que va a pasar. Y tambien agrega una introduccion breve de como entnder el indicador resultande)
+18 (Bosques altos, densos y poco disturbados). (**Describe brevemente que pas en el códifgo , grosso modo como es la integración, se suman , ponderan ??, es decir guia rapida para entnder que va a pasar. Y tambien agrega una introduccion breve de como entnder el indicador resultante)
 
 ## Pre-requisitos
 Solo se requiere una cuenta activa de Google Earth Engine y definir el año y área de estudio (aoi). En el script se realiza una prueba con un aoi que cubre toda la parte continental de Colombia. Todos los insumos del script se encuentran disponibles en Assets de Google Earth Engine.
